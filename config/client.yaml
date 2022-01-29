@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-client
+  template:
+    metadata:
+      labels:
+        app: test-client
+        version: v1
+    spec:
+      containers:
+      - image: core.harbor.pml.com.cn/library/traffic:v1.0
+        args:
+        - sleep
+        - "99999"
+        imagePullPolicy: IfNotPresent
+        name: client
+        env:
+        - name: POD_NAME
+          valueFrom:
+              fieldRef:
+                  fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+              fieldRef:
+                  fieldPath: metadata.namespace
+

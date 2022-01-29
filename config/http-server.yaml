@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-http
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-http
+  template:
+    metadata:
+      labels:
+        app: test-http
+        version: v1
+    spec:
+      containers:
+      - image: core.harbor.pml.com.cn/library/traffic:v1.0
+        args:
+        - http-server
+        ports:
+        - containerPort: 80
+        imagePullPolicy: IfNotPresent
+        name: http
+        env:
+        - name: POD_NAME
+          valueFrom:
+              fieldRef:
+                  fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+              fieldRef:
+                  fieldPath: metadata.namespace
+        - name: COLUMNS
+          value: "300"
+                
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-http
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  selector:
+    app: test-http

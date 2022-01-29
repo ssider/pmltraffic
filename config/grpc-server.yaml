@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-grpc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-grpc
+  template:
+    metadata:
+      labels:
+        app: test-grpc
+        version: v1
+    spec:
+      containers:
+      - image: core.harbor.pml.com.cn/library/traffic:v1.0
+        args:
+        - grpc-server
+        ports:
+        - containerPort: 9090
+        imagePullPolicy: IfNotPresent
+        name: grpc
+        env:
+        - name: POD_NAME
+          valueFrom:
+              fieldRef:
+                  fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+              fieldRef:
+                  fieldPath: metadata.namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-grpc
+spec:
+  ports:
+  - name: grpc
+    port: 9090
+    targetPort: 9090
+  selector:
+    app: test-grpc
